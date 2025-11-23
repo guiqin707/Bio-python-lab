@@ -1,0 +1,75 @@
+# 题目：一
+# 统计核苷酸数目（Counting DNA Nucleotides）
+# Given: A DNA string ss of length at most 1000 nt.
+# 所给：一条被命名为ss的DNA链，长度至少为1000个碱基。
+# Return: Four integers(separated by spaces) counting the respective number of times that the
+# symbols &  # 39;A&#​39;, &#39;C&#​39;, &#39;G&#​39;, and &#39;T&#​39; occur in ss.
+#  需得：四个以空格分隔的整数，分别为ss中A、C、G、T的数量。
+# 测试数据
+# AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC
+
+# 输入DNA序列
+dna_string = "AGCTTTTCATTCTGACTGCAACGGGCAATATGTCTCTGTGTGGATTAAAAAAAGAGTGTCTGATAGCAGC"
+
+# 方法一：使用字符串的count方法
+def count_nucleotides_1(s):
+    a_count = s.count('A')
+    c_count = s.count('C')
+    g_count = s.count('G')
+    t_count = s.count('T')
+    return f"{a_count} {c_count} {g_count} {t_count}"
+
+# 方法2：使用循环计数
+def count_nucleotides_2(s):
+    # 创建一个字典来存储每个核苷酸的计数，初始值都为0
+    counts = {'A': 0, 'C': 0, 'G': 0, 'T': 0}
+
+    # 遍历DNA字符串中的每一个字符（每个核苷酸）
+    for nucleotide in s:
+        # 检查当前字符是否是我们要统计的核苷酸之一
+        if nucleotide in counts:
+            # 如果是，就在字典中对应的计数上加1
+            counts[nucleotide] += 1
+
+    # 从字典中取出四个核苷酸的计数，用空格分隔返回
+    return f"{counts['A']} {counts['C']} {counts['G']} {counts['T']}"
+
+# 方法三：使用collections.Counter
+from collections import Counter
+
+def count_nucleotides_3(s):
+    counter = Counter(s)
+    return f"{counter['A']} {counter['C']} {counter['G']} {counter['T']} "
+# 测试三种方法
+print("方法1结果：",count_nucleotides_1(dna_string))
+print("方法2结果：",count_nucleotides_2(dna_string))
+print("方法3结果：",count_nucleotides_3(dna_string))
+
+# 最简洁的版本（推荐使用）
+def count_dna_nucleotides(dna):
+    return f"{dna.count('A')} {dna.count('C')} {dna.count('G')} {dna.count('T')} "
+
+# 最终输出结果
+print("\n最终输出结果：")
+print(count_dna_nucleotides(dna_string))
+
+# 如果需要从文件读取DNA序列：
+
+# def count_dna_from_file(filename):
+#     with open(filename,'r') as file:
+#         dna = file.read().strip()
+#     return f"{dna.count('A')} {dna.count('C')} {dna.count('G')} {dna.count('T')} "
+# 如果DNA序列在文件中，使用这个函数
+# print(count_dna_from_file('dna_sequence.txt')
+
+# 大小写不敏感：
+# def count_nucleotides_case_insensitive(s):
+#     s_upper = s.upper()  # 转换为大写
+#     return f"{s_upper.count('A')} {s_upper.count('C')} {s_upper.count('G')} {s_upper.count('T')}"
+# # 2.验证DNA序列有效性：
+# def is_valid_dna(s):
+#     valid_chars = set('ACGTacgt')
+#     return all(char in valid_chars for char in s)#再次返回看不懂时，去问AI
+# # 3.处理RNA序列（将T替换为U）
+# def count_rna_nucleotides(s):
+#     return f"{s.count('A')} {s.count('C')} {s.count('G')} {s.count('U')}"
