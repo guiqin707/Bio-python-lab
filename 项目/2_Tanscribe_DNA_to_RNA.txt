@@ -1,0 +1,20 @@
+# 题目：使用replace
+# DNA转录为RNA（Transcribing DNA into RNA）
+# Given: A DNA string tt, which corresponding to a coding strand, having length at most 1000 nt.
+# 所给：一条被命名为tt的DNA编码链，长度至少为1000个碱基。
+# Return: The transcribed RNA string of tt.
+# 需得：由tt经转录得到的RNA链。
+# 测试数据:GATGGAACTTGACTACGTAAATT
+def transcribe_dna_to_rna(dna):
+    """
+    将DNA字符串转录为RNA字符串
+    通过将所有‘T’替换为‘U’实现
+    """
+    return dna.replace('T','U')
+# 测试数据
+dna_sequence = 'GATGGAACTTGACTACGTAAATT'
+# 执行转录
+rna_sequence = transcribe_dna_to_rna(dna_sequence)
+# 输出结果
+print('DNA序列：', dna_sequence)
+print('RNA序列：', rna_sequence)
