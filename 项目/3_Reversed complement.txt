@@ -1,0 +1,43 @@
+def reverse_complement(dna):
+    """生成DNA字符串的反向互补序列
+
+    步骤：
+    1.反转字符串
+    2.将每个碱基替换为其互补碱基（A和T互换，C和G互换）
+
+    """
+
+# 定义碱基互补映射
+    complement = {'A' : 'T', 'T' : 'A', 'C' : 'G', 'G' : 'C'}
+
+# 反转字符串并替换每个碱基为其互补碱基
+    reversed_dna = dna[::-1]  #反转字符串,[::-1] 是Python的切片语法，表示"从开始到结束，步长为-1",-1 表示反向，每次移动一步，也就是反转字符串
+    complement_sequence = ''.join(complement[base] for base in reversed_dna)
+    #join() 方法将一系列字符串连接成一个字符串,''.join(['A', 'C', 'C', 'G'])  # 结果是 "ACCGG"
+    return complement_sequence
+
+# 测试数据
+dna_sequence = "AAAACCCGGT"
+
+# 生成反向互补序列
+reverse_complement_sequence = reverse_complement(dna_sequence)
+
+# 输出结果
+
+print("原始DNA序列：", dna_sequence)
+print("反向互补序列：",reverse_complement_sequence)
+# # 这是一个"生成器表达式"，它会逐个产生互补碱基
+# (complement[base] for base in reversed_dna)
+
+# [::-1] 的含义：
+# 开始位置：空表示从序列的末尾开始（因为步长为负）
+# 结束位置：空表示到序列的开头结束
+# 步长：-1 表示反向，每次移动一步
+
+# 生成器表达式？
+# 基本语法：(表达式 for 变量 in 序列)
+# (complement[base] for base in reversed_dna)
+# 这行代码的意思是：
+# 对于reversed_dna中的每个base
+# 计算complement[base]（查找互补碱基）
+# 逐个产生这些互补碱基
