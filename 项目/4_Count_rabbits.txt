@@ -1,0 +1,27 @@
+# 题目：
+# 根据斐波那契数列计算兔子的繁殖情况
+# Given: Positive integers n&lt;40and k&lt;5.
+# 所给：正整数n和k，n&lt;40，k&lt;5。
+# Return: The total number of rabbit pairs that will be present after n months,
+# if we begin with 1 pair and in each generation,
+# every pair of reproduction-age rabbits produces a litter of k rabbit pairs (instead of only 1 pair).
+# 需得：经过n个月后共有多少对兔子，第一个月有1对兔子，每对成年兔子每个月可以生k对小兔子
+# （而不是我们熟悉的斐波那契数列假设的每月生一对）。
+
+def rabbit_pairs(n, k):
+    if n == 1 or n ==2:
+        return 1    # 前两个月只有初始的1对兔子
+    # 初始化前两个月的值
+    prev1, prev2 = 1, 1   # prev1 = F(n-1), prev2 = F(n-2)
+    # 从第3个月开始计算
+    for _ in range(3,n+1):
+        # 当前月的兔子对数 = 上个月的兔子对数 + k × 上上个月的兔子对数
+        current = prev1 + k * prev2
+        # 更新状态，为下一个月做准备
+        prev2 , prev1 = prev1, current
+    return prev1
+
+n = 5
+k = 3
+result = rabbit_pairs(n,k)
+print(result)
