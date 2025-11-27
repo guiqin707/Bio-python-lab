@@ -1,0 +1,158 @@
+# 题目：
+# 计算DNA序列GC含量（Computing GC content）
+# Given: At most 10 DNA strings in FASTA format (of length at most 1 kbp each).
+# 所给：不超过10条DNA序列，每条最少1kbp，以FASTA格式提供
+# Return: The ID of the string having the highest GC-content,
+# followed by the GC-content of that string.
+# Rosalind allows for a default error of 0.001 in all decimal answers unless otherwise stated;
+# please see the note on absolute error below.
+# 需得：GC含量最高序列的ID，以及其GC含量。允许误差0.001。
+# 测试数据
+# &gt;Rosalind_6404
+# CCTGCGGAAGATCGGCACTAGAATAGCCAGAACCGTTTCTCTGAGGCTTCCGGCCTTCCC
+# TCCCACTAATAATTCTGAGG
+#
+# &gt;Rosalind_5959
+# CCATCGGTAGCGCATCCTTAGTCCAATTAAGTCCCTATCCAGGCGCTCCGCCGAAGGTCT
+# ATATCCATTTGTCAGCAGACACGC
+#
+# &gt;Rosalind_0808
+# CCACCCTCGTGGTATGGCTAGGCATTCAGGAACCGGAGAACGCTTCAGACCAGCCCGGAC
+# TGGGAACCTGCGGGCAGTAGGTGGAAT
+#
+def parse_fasta(data):
+    """
+    解析FASTA格式数据，返回字典：{序列ID：序列字符串}
+    """
+    # 创建一个空字典，用于存储序列ID和对应的DNA序列
+    sequences = {}
+    # 初始化当前处理的序列ID为None（表示还没有开始处理任何序列）
+    current_id = None
+    # 初始化一个空列表，用于临时存储当前序列的多行数据
+    current_seq = []
+
+    # 将输入的FASTA数据按行分割，然后逐行处理
+    for line in data.split('\n'):
+        # 检查当前行是否是序列ID行（以'>'开头）
+        if line.startswith('>'):
+            #如果是新的序列ID
+            # 检查是否已经有一个序列正在处理中
+            if current_id is not None:
+                # 如果有，将之前处理的序列保存到字典中
+                # 使用join方法将列表中的多行序列连接成一个字符串
+                sequences[current_id] = ''.join(current_seq)
+                #开始新的序列
+                # 提取序列ID（去掉开头的'>'字符和两端的空白字符）
+            current_id = line[1:].strip() #去掉‘>’和空白字符
+            # 重置序列列表，准备存储新序列的数据
+            current_seq = []
+        else:
+            #如果是序列行，添加到当前序列
+            # 使用strip()去掉行两端的空白字符
+            current_seq.append(line.strip())
+    if current_id is not None:
+        sequences[current_id] = ''.join(current_seq)
+    return sequences
+
+def calculate_gc_content(sequence):
+    """
+    计算单个序列的gc含量
+    """
+    gc_count = sequence.count('G') + sequence.count('C')
+    # 获取序列的总长度
+    total_length =len(sequence)
+
+    # 检查序列是否为空，避免除以零的错误
+    if total_length == 0:
+        return 0
+    # 计算GC含量百分比并返回
+    # GC含量 = (G和C的数量 / 总长度) × 100
+    return(gc_count / total_length) * 100
+
+def find_highest_gc_content(fasta_data):
+    """
+    找出GC含量最高的序列
+    """
+    # 调用parse_fasta函数解析FASTA数据
+    # 得到一个字典，包含所有序列ID和对应的DNA序列
+    sequences = parse_fasta(fasta_data)
+
+    # 初始化变量，用于跟踪最高GC含量和对应的序列ID
+    max_gc_id = None   # 初始化为None，表示还没有找到
+    max_gc_content = 0   # 初始化为0，表示最低可能的GC含量
+
+    # 遍历字典中的所有序列
+    # items()方法返回键值对(序列ID, 序列字符串)
+    for seq_id, sequence in sequences.items():
+        # 计算当前序列的GC含量
+        gc_content = calculate_gc_content(sequence)
+
+        # 检查当前序列的GC含量是否比已知的最高值更高
+        if gc_content > max_gc_content:
+            # 如果是，更新最高GC含量和对应的序列ID
+            max_gc_content = gc_content
+            max_gc_id = seq_id
+    # 返回找到的最高GC含量的序列ID和GC含量值
+    return max_gc_id, max_gc_content
+# 测试数据
+fasta_data = """>Rosalind_6404
+CCTGCGGAAGATCGGCACTAGAATAGCCAGAACCGTTTCTCTGAGGCTTCCGGCCTTCCC
+TCCCACTAATAATTCTGAGG
+>Rosalind_5959
+CCATCGGTAGCGCATCCTTAGTCCAATTAAGTCCCTATCCAGGCGCTCCGCCGAAGGTCT
+ATATCCATTTGTCAGCAGACACGC
+>Rosalind_0808
+CCACCCTCGTGGTATGGCTAGGCATTCAGGAACCGGAGAACGCTTCAGACCAGCCCGGAC
+TGGGAACCTGCGGGCAGTAGGTGGAAT"""
+
+# 执行计算
+# 调用find_highest_gc_content函数，传入FASTA数据
+# 函数返回两个值：最高GC含量的序列ID和GC含量值
+max_id, max_gc = find_highest_gc_content(fasta_data)
+
+# 输出结果
+# 使用格式化字符串输出结果
+# {max_id} 是序列ID
+# {max_gc:.6f} 是GC含量，保留6位小数
+print(f"{max_id}\n{max_gc:.6f}")
+
+# # 简洁版
+# def calculate_gc_content(seq):
+#     gc_count = seq.count('G') + seq.count('C')
+#     return (gc_count / len(seq)) * 100 if seq else 0
+#
+#
+# # 解析FASTA数据并计算GC含量
+# def process_fasta(data):
+#     sequences = {}
+#     lines = data.strip().split('\n')
+#     current_id = ""
+#
+#     for line in lines:
+#         if line.startswith('>'):
+#             current_id = line[1:]
+#             sequences[current_id] = ""
+#         else:
+#             sequences[current_id] += line
+#
+#     # 计算每个序列的GC含量
+#     gc_contents = {seq_id: calculate_gc_content(seq) for seq_id, seq in sequences.items()}
+#
+#     # 找出GC含量最高的序列
+#     max_id = max(gc_contents, key=gc_contents.get)
+#     return max_id, gc_contents[max_id]
+#
+#
+# # 使用示例
+# fasta_data = """>Rosalind_6404
+# CCTGCGGAAGATCGGCACTAGAATAGCCAGAACCGTTTCTCTGAGGCTTCCGGCCTTCCC
+# TCCCACTAATAATTCTGAGG
+# >Rosalind_5959
+# CCATCGGTAGCGCATCCTTAGTCCAATTAAGTCCCTATCCAGGCGCTCCGCCGAAGGTCT
+# ATATCCATTTGTCAGCAGACACGC
+# >Rosalind_0808
+# CCACCCTCGTGGTATGGCTAGGCATTCAGGAACCGGAGAACGCTTCAGACCAGCCCGGAC
+# TGGGAACCTGCGGGCAGTAGGTGGAAT"""
+#
+# max_id, max_gc = process_fasta(fasta_data)
+# print(f"{max_id}\n{max_gc:.6f}")
