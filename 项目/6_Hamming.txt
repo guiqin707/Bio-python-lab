@@ -1,0 +1,53 @@
+# 题目：
+# 计算Hamming距离
+# Hamming距离是指两个等长字符串在相同位置上不同字符的个数
+# Given: Two DNA strings s and t of equal length (not exceeding 1 kbp).
+# 所给：2条等长DNA序列，不超过1kbp。
+# Return: The Hamming distance dH(s,t).
+# 需得：两条序列的Hamming距离。
+# 测试数据
+# GAGCCTACTAACGGGAT
+# CATCGTAATGACGGCCT
+
+def hamming_distance(s, t):
+    """计算两个等长DNA的hamming距离
+
+    参数：
+    s, t：两个等长的DNA字符串
+
+    返回：
+    两个序列之间的Hamming距离（整数
+    ）"""
+    #检查两个序列长度是否相等
+    if len(s) != len(t):
+        raise ValueError("两个DNA序列长度必须相等")
+
+    #初始化距离计数器
+    distance = 0
+
+    #遍历每个位置，比较两个序列的字符
+    for i in range(len(s)):
+        if s[i] != t[i]:
+            distance += 1
+    return distance
+
+# 测试数据
+s = "GAGCCTACTAACGGGAT"
+t = "CATCGTAATGACGGCCT"
+
+# 计算Hamming距离
+result = hamming_distance(s, t)
+print(result)
+
+#法2
+def hanmming_distance(s, t):
+    """
+    计算两个等长DNA序列的Hamming距离（简洁版）
+    """
+    return sum(1 for a, b in zip(s, t) if a != b)
+
+# 使用示例
+s = "GAGCCTACTAACGGGAT"
+t = "CATCGTAATGACGGCCT"
+result = hamming_distance(s, t)
+print(result)
