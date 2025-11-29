@@ -1,0 +1,46 @@
+# 题目：
+# 孟德尔第一定律（Mendel&#39;s First Law
+# Given: Three positive integers k, m, and n, representing a population containing k+m+n organisms:
+# k individuals are homozygous dominant for a factor, m are heterozygous, and n are homozygous recessive.
+# 所给：三个正整数k、m、n，分别代表一个群体中某基因的基因型个体数目，
+# k是显性纯合个体，m是杂合个体，n为隐形纯合个体，即群体总个体数为k + m + n。
+# Return: The probability that two randomly selected mating organisms will produce an individual possessing a dominant allele
+# (and thus displaying the dominant phenotype).
+# Assume that any two organisms can mate.
+# 需得：随机选取两个个体，生出一个表现显性性状个体的概率（假设任意两个个体均可交配）。
+# 测试数据：2 2 2
+
+def mendel_first_law(k, m, n):
+    """
+        计算随机选择两个个体交配后产生显性性状后代的概率
+
+        参数:
+        k: 显性纯合个体数 (AA)
+        m: 杂合个体数 (Aa)
+        n: 隐性纯合个体数 (aa)
+
+        返回:
+        产生显性性状后代的概率
+    """
+    total = k + m + n
+
+    #计算所有可能的配对组合数
+    total_pairs = total * (total - 1)
+    #计算产生显性后代的配对组合数
+    dominant_pairs = (
+        k * (k - 1) +        # AA × AA → 全部显性
+        2 * k * m +          # AA × Aa → 全部显性，乘以2是因为有两种顺序：AA × Aa 和 Aa × AA
+        2 * k * n +          # AA × aa → 全部显性 ，乘以2是因为有两种顺序：AA × Aa 和 Aa × AA
+        0.75 * m * (m - 1)+    # Aa × Aa → 3/4显性
+        m * n                  # Aa × aa → 1/2显性，权重为0.5（50%显性），乘以2是因为有两种顺序
+    )
+    #计算概率
+    probability = dominant_pairs / total_pairs
+
+    return probability
+# 测试数据
+k, m, n = 2, 2 ,2
+
+# 计算概率
+result = mendel_first_law(k, m ,n)
+print(f"概率为：{result}")
