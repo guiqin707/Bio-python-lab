@@ -1,0 +1,118 @@
+# 题目：
+# 把RNA翻译为蛋白质（Translating RNA into Protein）
+# Given: An RNA string s corresponding to a strand of mRNA (of length at most 10 kbp).
+# 所给：一条mRNA序列，长度不超过10kb。
+# Return: The protein string encoded by s.
+# 需得：s编码的蛋白质。
+# 测试数据：AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA
+
+def rna_to_protein(rna_string):
+    """
+    将RNA字符串翻译为蛋白质字符串
+
+    参数：
+    rna_string: RNA字符串
+
+    返回：
+    蛋白质字符串
+    """
+# 遗传密码字典： 将RNA密码子映射到对应的氨基酸
+    genetic_code = {
+    'UUU': 'F', 'UUC': 'F', 'UUA': 'L', 'UUG': 'L',
+    'UCU': 'S', 'UCC': 'S', 'UCA': 'S', 'UCG': 'S',
+    'UAU': 'Y', 'UAC': 'Y', 'UAA': '*', 'UAG': '*',
+    'UGU': 'C', 'UGC': 'C', 'UGA': '*', 'UGG': 'W',
+    'CUU': 'L', 'CUC': 'L', 'CUA': 'L', 'CUG': 'L',
+    'CCU': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+    'CAU': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
+    'CGU': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
+    'AUU': 'I', 'AUC': 'I', 'AUA': 'I', 'AUG': 'M',
+    'ACU': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
+    'AAU': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
+    'AGU': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+    'GUU': 'V', 'GUC': 'V', 'GUA': 'V', 'GUG': 'V',
+    'GCU': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A',
+    'GAU': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+    'GGU': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G'
+}
+
+    protein = ""
+# 遍历RNA字符串，每次取三个碱基（一个密码子）
+    for i in range(0, len(rna_string), 3):
+        codon = rna_string[i:i+3]
+
+        #如果密码子长度不足3，则忽略
+        if len(codon) < 3:
+         break
+
+        #查找密码子对应的氨基酸
+        amino_acid = genetic_code.get(codon, '')   #使用字典的get方法查找密码子对应的氨基酸
+        # 如果codon在字典中，返回对应的氨基酸
+        # 如果codon不在字典中，返回空字符串 ''
+
+
+        #如果遇到终止密码子（用*表示），停止翻译
+        if amino_acid =='*':
+            break
+
+        #将氨基酸添加到蛋白质序列中
+        protein += amino_acid
+
+    return protein
+
+# 测试数据
+rna_sequence = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA"
+
+# 执行翻译
+protein_sequence = rna_to_protein(rna_sequence)
+
+# 输出结果
+print(protein_sequence)
+
+
+def rna_to_protein_list_comprehension(rna_string):
+    """
+    使用列表推导式将RNA字符串翻译为蛋白质字符串
+    """
+    genetic_code = {
+        'UUU': 'F', 'UUC': 'F', 'UUA': 'L', 'UUG': 'L',
+        'UCU': 'S', 'UCC': 'S', 'UCA': 'S', 'UCG': 'S',
+        'UAU': 'Y', 'UAC': 'Y', 'UAA': '*', 'UAG': '*',
+        'UGU': 'C', 'UGC': 'C', 'UGA': '*', 'UGG': 'W',
+        'CUU': 'L', 'CUC': 'L', 'CUA': 'L', 'CUG': 'L',
+        'CCU': 'P', 'CCC': 'P', 'CCA': 'P', 'CCG': 'P',
+        'CAU': 'H', 'CAC': 'H', 'CAA': 'Q', 'CAG': 'Q',
+        'CGU': 'R', 'CGC': 'R', 'CGA': 'R', 'CGG': 'R',
+        'AUU': 'I', 'AUC': 'I', 'AUA': 'I', 'AUG': 'M',
+        'ACU': 'T', 'ACC': 'T', 'ACA': 'T', 'ACG': 'T',
+        'AAU': 'N', 'AAC': 'N', 'AAA': 'K', 'AAG': 'K',
+        'AGU': 'S', 'AGC': 'S', 'AGA': 'R', 'AGG': 'R',
+        'GUU': 'V', 'GUC': 'V', 'GUA': 'V', 'GUG': 'V',
+        'GCU': 'A', 'GCC': 'A', 'GCA': 'A', 'GCG': 'A',
+        'GAU': 'D', 'GAC': 'D', 'GAA': 'E', 'GAG': 'E',
+        'GGU': 'G', 'GGC': 'G', 'GGA': 'G', 'GGG': 'G'
+    }
+
+    # 使用列表推导式生成密码子列表
+    codons = [rna_string[i:i + 3] for i in range(0, len(rna_string), 3)]
+
+    # 使用列表推导式翻译密码子为氨基酸
+    amino_acids = [genetic_code[codon] for codon in codons
+                   if len(codon) == 3 and genetic_code.get(codon) != '*']
+
+    # 将氨基酸列表连接成字符串
+    return ''.join(amino_acids)
+
+
+# 测试数据
+rna_sequence = "AUGGCCAUGGCGCCCAGAACUGAGAUCAAUAGUACCCGUAUUAACGGGUGA"
+
+# 执行翻译
+protein_sequence = rna_to_protein_list_comprehension(rna_sequence)
+
+# 输出结果
+print(protein_sequence)
+
+# for i in range(0, len(rna_string), 3) - 确定从哪里开始读取
+#
+# codon = rna_string[i:i+3] - 实际读取内容
