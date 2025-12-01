@@ -1,0 +1,46 @@
+def find_substring_positions(s, t):
+    """
+    查找子序列t在主序列s中出现的所有位置
+
+    参数：
+    s：主DNA序列
+    t：要查找的子序列
+
+    返回：
+    子序列t在s中出现的所有起始位置列表（从1开始计数）
+    """
+
+    positions = []
+    t_length = len(t)
+
+    #遍历主序列s，检查每个可能的位置
+    for i in range(len(s) - t_length + 1):
+        #检查从位置i开始，长度为t_length的子串是否等于t
+        if s[i:i + t_length ] == t:
+            #记录位置，从1开始计数
+            positions.append(i + 1)
+
+    return positions
+
+# 测试数据
+s = "GATATATGCATATACTT"
+t = "ATAT"
+
+# 查找位置
+positions = find_substring_positions(s, t)
+
+# 输出结果
+print(" ".join(map(str,positions)))
+
+def find_substring_positions_short(s, t):
+    """
+    使用列表推导式查找子序列位置
+    """
+    t_length = len(t)
+    return[i + 1 for i in range(len(s) - t_length +1) if s[i:i + t_length] == t]
+
+# 测试
+s = "GATATATGCATATACTT"
+t = "ATAT"
+# map(str, positions)：将每个整数转换为字符串，如 ["2", "4", "10"]
+print(" ".join(map(str, find_substring_positions_short(s, t))))
