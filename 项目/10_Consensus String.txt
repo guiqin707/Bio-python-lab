@@ -1,0 +1,114 @@
+# 题目：
+# 寻找最可能的祖先序列
+# Given: A collection of at most 10 DNA strings of equal length (at most 1 kbp) in FASTA format.
+# 所给：不超过十条等长DNA序列，长度均不超过1kb，以FASTA格式给出。
+# Return: A consensus string and profile matrix for the collection. (If several possible consensus strings exist, then you may return any one of them.)
+# 需得：这些DNA的一致序列和profile矩阵（如果存在多条一致序列，返回任意一条即可）。
+# 测试数据
+# &gt;Rosalind_1
+# ATCCAGCT
+# &gt;Rosalind_2
+# GGGCAACT
+# &gt;Rosalind_3
+# ATGGATCT
+# &gt;Rosalind_4
+# AAGCAACC
+# &gt;Rosalind_5
+# TTGGAACT
+# &gt;Rosalind_6
+# ATGCCATT
+# &gt;Rosalind_7
+# ATGGCACT
+#
+# 一致序列是指在每个位置上选择出现频率最高的碱基组成的序列。
+def parse_fasta(data):
+    """解析FASTA格式数据，返回序列列表"""
+    sequences = []
+    current_seq = ""   # 创建一个空字符串，用于临时存储当前正在读取的序列
+
+    for line in data.split('\n'):
+        if line.startswith('>'):
+            #如果是新的序列ID
+            if current_seq:     # 检查current_seq是否非空（表示已经有读取的序列）,if current_seq != "":
+                # 对于字符串，空字符串 "" 被视为 False，非空字符串被视为 True
+                sequences.append(current_seq)
+            current_seq = ""
+        else:
+            #如果是序列行，添加到当前序列
+            current_seq += line.strip()  # 将当前行的序列数据添加到current_seq中
+
+    #添加最后一个序列
+    if current_seq:
+        sequences.append(current_seq)
+
+    return sequences
+
+def calculate_consensus_and_profile(sequences):
+    """计算一致序列和profile矩阵"""
+    if not sequences:
+        return "", {}    # 如果为空，返回空字符串和空字典
+
+    #获取序列长度（假设所有序列等长）
+    seq_length = len(sequences[0])  # 取第一条序列的长度作为所有序列的长度
+
+    #初始化profile矩阵
+    #使用字典存储每个位置的碱基计数
+    profile = {
+        'A': [0] * seq_length,   # 创建长度为seq_length的列表，用于统计A在每个位置的出现次
+        'C': [0] * seq_length,
+        'G': [0] * seq_length,
+        'T': [0] * seq_length
+    }
+
+    #填充profile矩阵
+    for seq in sequences:
+        for i, nucleotide in enumerate(seq):
+            profile[nucleotide][i] += 1  # 在对应碱基的对应位置上增加计数
+    #计算一致序列
+    consensus = []
+    for i in range(seq_length):
+        #找到当前位置出现次数最多的碱基
+        max_count = 0
+        max_nucleotide = 'A'
+
+        for nucleotide in ['A','C', 'G', 'T']:
+            if profile[nucleotide][i] >max_count:
+                max_count = profile[nucleotide][i]
+                max_nucleotide = nucleotide
+        consensus.append(max_nucleotide)
+    consensus_string = ''.join(consensus)
+
+    return consensus_string, profile
+
+# 测试数据
+fasta_data = """>Rosalind_1
+ATCCAGCT
+>Rosalind_2
+GGGCAACT
+>Rosalind_3
+ATGGATCT
+>Rosalind_4
+AAGCAACC
+>Rosalind_5
+TTGGAACT
+>Rosalind_6
+ATGCCATT
+>Rosalind_7
+ATGGCACT"""
+
+# 解析FASTA数据
+sequences = parse_fasta(fasta_data)
+
+# 计算一致序列和profile矩阵
+consensus, profile = calculate_consensus_and_profile(sequences)
+
+# 输出结果
+print(consensus)
+print("A:", " ".join(map(str, profile['A'])))
+print("C:", " ".join(map(str, profile['C'])))
+print("G:", " ".join(map(str, profile['G'])))
+print("T:", " ".join(map(str, profile['T'])))
+
+# 在生物信息学中，当我们有多条相关的DNA序列时，一致序列代表这些序列的"共识"或"最可能的共同祖先"。
+# Profile矩阵是一个统计表格，显示在每个位置上各个碱基出现的次数。
+# line.strip()：移除行首尾的空白字符（如空格、制表符、换行符）
