@@ -1,0 +1,64 @@
+# 题目：
+# 根据斐波那契数列计算兔子的繁殖情况，兔子会死亡
+# Given: Positive integers n&lt;100 and m&lt;20.
+# 所给：正整数n和m，n&lt;100，m&lt;20。
+# Return: The total number of pairs of rabbits that will remain after the n-th month if all rabbits live for m months.
+# 需得：经过n个月后共有多少对兔子，假设兔子的寿命为m个月。
+# 测试数据
+# 6 3
+
+def rabbit_population(n, m):
+    """
+    计算经过n个月后兔子的对数，假设兔子寿命为m个月
+
+    参数：
+    n：经过的月份数
+    m：兔子的寿命
+    返回：
+    第n个月后的兔子对数
+    """
+    # 创建一个列表来存储每个年龄段的兔子对数
+    # ages[i] 表示年龄为i个月的兔子对数（i从1到m）
+    # 为了方便，我们使用索引0表示年龄1个月，索引1表示年龄2个月，...
+    ages = [0] * m
+    #初始状态：第一个月有一对刚出生的兔子（年龄为0）
+    #但为了与我们的年龄数组一致，我们将其设为年龄1个月
+    ages[0] = 1  #年龄为1个月的兔子有1对
+
+    #模拟每个月的繁殖和死亡过程
+    for month in range(2, n+1):
+        #计算本月新出生的兔子对数
+        #所有年龄大于等于2个月的兔子都可以繁殖
+        new_born = sum(ages[1:]) #索引1及以后表示2个月的兔子
+
+        #兔子年龄增加一个月（同时处理死亡）
+        #年龄为m的兔子死亡（从列表中移除）
+        #从后往前更新，避免覆盖
+        for i in range(m-1, 0, -1):
+            ages[i] = ages[i-1]
+
+        #新出生的兔子成为年龄一个月的兔子
+        ages[0] = new_born
+
+    #返回第n个月后的兔子总数
+    return sum(ages)
+
+# 测试数据
+n = 6
+m = 3
+result = rabbit_population(n,m)
+print(f"经过{n}个月后，兔子对数为：{result}")
+
+
+def rabbit_population_simple(n, m):
+    ages = [1] + [0] * (m - 1)
+
+    for month in range(2, n + 1):
+        new_born = sum(ages[1:])
+        ages = [new_born] + ages[:-1]
+
+    return sum(ages)
+
+
+# 测试
+print(rabbit_population_simple(6, 3))  # 输出: 4
