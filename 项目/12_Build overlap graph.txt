@@ -1,0 +1,100 @@
+# 题目：
+# 构建重叠图（overlap graph）
+# Given: A collection of DNA strings in FASTA format having total length at most 10 kbp.
+# 所给：多条DNA序列，长度均不超过10kb，以FASTA格式给出。
+# Return: The adjacency list corresponding to O3. You may return edges in any order.
+# 需得：O3邻接表，以任意顺序给出。
+# 测试数据
+# &gt;Rosalind_0498
+# AAATAAA
+# &gt;Rosalind_2391
+# AAATTTT
+# &gt;Rosalind_2323
+# TTTTCCC
+# &gt;Rosalind_0442
+# AAATCCC
+# &gt;Rosalind_5013
+# GGGTGGG
+
+def parse_fasta(data):
+    """解析FASTA格式数据，返回标识符列表和序列列表"""
+    ids = []  # 创建一个空列表，用于存储序列ID
+    sequences = []  # 创建一个空列表，用于存储DNA序列
+    current_id = None  # 初始化当前ID为None，表示还没有读取到任何ID
+    current_seq = []  # 初始化当前序列为空列表，用于存储多行的序列数据
+
+    # 将输入的多行字符串按换行符分割，然后逐行处理
+    for line in data.split('\n'):
+        line = line.strip()  # 移除行首尾的空白字符（如空格、制表符）
+        if not line:  # 如果行是空的，跳过这一行
+            continue
+        if line.startswith('>'):  # 检查当前行是否以'>'开头（序列ID行）
+            # 保存前一个序列
+            if current_id is not None:  # 如果已经有正在处理的序列ID
+                sequences.append(''.join(current_seq))  # 将当前序列列表连接成字符串并添加到序列列表
+                ids.append(current_id)  # 将当前ID添加到ID列表
+            # 开始新的序列
+            current_id = line[1:]  # 去掉行首的'>'，得到序列ID
+            current_seq = []  # 重置当前序列为空列表，准备读取新序列
+        else:
+            # 序列行（不是以'>'开头的行）
+            current_seq.append(line)  # 将当前行添加到当前序列列表中
+    # 保存最后一个序列（循环结束后处理）
+    if current_id is not None:  # 检查是否还有未保存的序列
+        sequences.append(''.join(current_seq))  # 保存最后一个序列
+        ids.append(current_id)  # 保存最后一个ID
+
+    return ids, sequences  # 返回ID列表和序列列表
+
+
+def build_overlap_graph(ids, sequences, k=3):
+    """
+    构建重叠图，返回边列表
+
+    参数：
+    ids：序列标识符列表
+    sequences：序列列表
+    k: 重叠长度
+
+    返回：
+    边列表，每个边是（源标识符，目标标识符）
+    """
+    edges = []  # 创建一个空列表，用于存储边
+    n = len(ids)  # 获取序列的数量
+
+    # 双重循环检查所有可能的序列对
+    for i in range(n):  # 外层循环：遍历所有序列作为源序列
+        for j in range(n):  # 内层循环：遍历所有序列作为目标序列
+            if i != j:  # 排除自身到自身的边（自环）
+                # 检查序列i的后k个字符是否等于序列j的前k个字符
+                # sequences[i][-k:] 获取序列i的最后k个字符
+                # sequences[j][:k]  获取序列j的前k个字符
+                if sequences[i][-k:] == sequences[j][:k]:
+                    # 如果重叠条件满足，添加一条从ids[i]到ids[j]的边
+                    edges.append((ids[i], ids[j]))
+
+    return edges  # 返回边列表
+
+
+# 测试数据
+fasta_data = """>Rosalind_0498
+AAATAAA
+>Rosalind_2391
+AAATTTT
+>Rosalind_2323
+TTTTCCC
+>Rosalind_0442
+AAATCCC
+>Rosalind_5013
+GGGTGGG"""
+
+# 解析FASTA数据
+ids, sequences = parse_fasta(fasta_data)
+
+# 构建重叠图（重叠长度为3）
+edges = build_overlap_graph(ids, sequences, k=3)
+
+# 输出结果
+for source, target in edges:  # 遍历所有边
+    print(f"{source} {target}")  # 按照要求格式输出
+# 关键特点： 内层循环会完全执行完它的所有循环，然后外层循环才进入下一次。
