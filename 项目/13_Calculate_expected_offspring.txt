@@ -1,0 +1,39 @@
+def calculate_expected_offspring(counts):
+    """
+    计算下一代表现显性性状的期望值
+
+    参数：
+    counts: 包含6个整数的列表，分别代表不同基因型组合的夫妇数目
+           [AA-AA, AA-Aa, AA-aa, Aa-Aa, Aa-aa, aa-aa]
+
+    返回:
+    下一代表现显性性状的期望数
+    """
+    #每队夫妇有两个后代
+    offspring_per_couple = 2
+
+    #各个基因型组合的后代表现显性性状的概率
+    probabilities = [1.0, 1.0, 1.0, 0.75, 0.5, 0.0]
+
+    #计算期望值
+    expected = 0
+    for i in range(6):
+        expected += counts[i] * offspring_per_couple * probabilities[i]
+
+    return expected
+# 测试数据
+counts = [1, 0, 0, 1, 0, 1]
+
+# 计算期望值
+result = calculate_expected_offspring(counts)
+
+# 输出结果
+print(result)
+
+def expected_offspring_short(counts):
+    # 直接计算公式
+    return 2 * (counts[0] + counts[1] + counts[2] + 0.75*counts[3] + 0.5*counts[4])
+
+# 使用示例
+counts = [1, 0, 0, 1, 0, 1]
+print(expected_offspring_short(counts))  # 输出: 3.5
