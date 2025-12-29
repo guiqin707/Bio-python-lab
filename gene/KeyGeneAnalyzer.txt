@@ -1,0 +1,119 @@
+class KeyGeneAnalyzer:
+    """关键基因分析类"""
+
+    def __init__(self, genes_df, expression_df):
+        self.genes_df = genes_df
+        self.expression_df = expression_df
+        self.results = None
+
+    def identify_differential_genes(self, method='t_test', pval_cutoff=0.05, fc_cutoff=2):
+        """识别差异表达基因"""
+        print("正在进行差异表达分析...")
+
+        # 分离正常和癌症样本
+        normal_samples = [col for col in self.expression_df.columns if 'Normal' in col]
+        cancer_samples = [col for col in self.expression_df.columns if 'Cancer' in col]
+
+        results = []
+
+        for gene_id in self.expression_df.index:
+            normal_expr = self.expression_df.loc[gene_id, normal_samples].values
+            cancer_expr = self.expression_df.loc[gene_id, cancer_samples].values
+
+            # 计算log2 fold change
+            mean_normal = np.mean(normal_expr)
+            mean_cancer = np.mean(cancer_expr)
+
+            if mean_normal > 0 and mean_cancer > 0:
+                log2_fc = np.log2(mean_cancer / mean_normal)
+                fold_change = mean_cancer / mean_normal
+            else:
+                log2_fc = 0
+                fold_change = 1
+
+            # 统计检验
+            if method == 't_test':
+                t_stat, p_value = stats.ttest_ind(normal_expr, cancer_expr)
+            elif method == 'mannwhitneyu':
+                u_stat, p_value = stats.mannwhitneyu(normal_expr, cancer_expr)
+            else:
+                raise ValueError("Unknown method")
+
+            # 判断是否为差异表达基因
+            is_de = (p_value < pval_cutoff) and (abs(fold_change) > fc_cutoff)
+            de_type = 'up' if fold_change > 1 and is_de else ('down' if is_de else 'none')
+
+            results.append({
+                'gene_id': gene_id,
+                'mean_normal': mean_normal,
+                'mean_cancer': mean_cancer,
+                'fold_change': fold_change,
+                'log2_fold_change': log2_fc,
+                'p_value': p_value,
+                'adjusted_p_value': p_value,  # 简单示例，实际应用需要多重检验校正
+                'is_differential': is_de,
+                'de_type': de_type
+            })
+
+        self.results = pd.DataFrame(results)
+
+        # 合并基因信息
+        self.results = pd.merge(self.results, self.genes_df, on='gene_id', how='left')
+
+        print(f"发现差异表达基因: {self.results['is_differential'].sum()}")
+        return self.results
+
+    def filter_key_genes(self,
+                         min_log2fc=1,
+                         max_pval=0.05,
+                         min_length=500,
+                         gc_range=(40, 60)):
+        """筛选关键基因"""
+        if self.results is None:
+            self.identify_differential_genes()
+
+        filtered_genes = self.results[
+            (self.results['is_differential']) &
+            (abs(self.results['log2_fold_change']) >= min_log2fc) &
+            (self.results['p_value'] <= max_pval) &
+            (self.results['length'] >= min_length) &
+            (self.results['gc_content'] >= gc_range[0]) &
+            (self.results['gc_content'] <= gc_range[1])
+            ].copy()
+
+        # 按log2 fold change排序
+        filtered_genes = filtered_genes.sort_values(
+            'log2_fold_change',
+            key=abs,
+            ascending=False
+        )
+
+        print(f"筛选得到关键基因: {len(filtered_genes)}个")
+        return filtered_genes
+
+    def analyze_gene_features(self):
+        """分析基因特征"""
+        if self.results is None:
+            self.identify_differential_genes()
+
+        de_genes = self.results[self.results['is_differential']]
+        non_de_genes = self.results[~self.results['is_differential']]
+
+        print(f"\n差异表达基因特征分析:")
+        print(f"上调基因: {(de_genes['de_type'] == 'up').sum()}")
+        print(f"下调基因: {(de_genes['de_type'] == 'down').sum()}")
+
+        return {
+            'de_genes': de_genes,
+            'non_de_genes': non_de_genes
+        }
+
+
+# 运行分析
+analyzer = KeyGeneAnalyzer(genes_df, expression_df)
+differential_genes = analyzer.identify_differential_genes(pval_cutoff=0.01, fc_cutoff=1.5)
+key_genes = analyzer.filter_key_genes(min_log2fc=1, max_pval=0.01)
+feature_analysis = analyzer.analyze_gene_features()
+
+print("\n关键基因列表（前10个）:")
+print(key_genes[['gene_id', 'log2_fold_change', 'p_value', 'length', 'gc_content']].head(10))
