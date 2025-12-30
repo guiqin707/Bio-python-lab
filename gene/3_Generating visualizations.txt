@@ -1,0 +1,114 @@
+class GeneVisualizer:
+    """Gene Data Visualizer"""
+
+    @staticmethod
+    def plot_volcano(results_df, pval_threshold=0.05, fc_threshold=1.5):
+        """Plot volcano plot"""
+        plt.figure(figsize=(10, 8))
+
+        # Set colors
+        colors = []
+        for idx, row in results_df.iterrows():
+            if row['p_value'] < pval_threshold and abs(row['fold_change']) > fc_threshold:
+                if row['fold_change'] > 1:
+                    colors.append('red')  # Up-regulated
+                else:
+                    colors.append('blue')  # Down-regulated
+            else:
+                colors.append('gray')
+
+        plt.scatter(results_df['log2_fold_change'],
+                    -np.log10(results_df['p_value']),
+                    c=colors, alpha=0.6, s=20)
+
+        # Add threshold lines
+        plt.axhline(-np.log10(pval_threshold), linestyle='--', color='black', alpha=0.5)
+        plt.axvline(np.log2(fc_threshold), linestyle='--', color='black', alpha=0.5)
+        plt.axvline(-np.log2(fc_threshold), linestyle='--', color='black', alpha=0.5)
+
+        plt.xlabel('log2(Fold Change)')
+        plt.ylabel('-log10(p-value)')
+        plt.title('Volcano Plot: Differential Expression Analysis')
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def plot_gene_expression_heatmap(expression_df, top_n=30):
+        """Plot expression heatmap"""
+        # Select most significant genes
+        if 'differential_genes' in globals():
+            top_genes = differential_genes.sort_values('p_value').head(top_n)['gene_id'].tolist()
+            heatmap_data = expression_df.loc[top_genes]
+        else:
+            heatmap_data = expression_df.head(top_n)
+
+        # Calculate Z-score normalization
+        z_scores = heatmap_data.apply(lambda x: (x - x.mean()) / x.std(), axis=1)
+
+        plt.figure(figsize=(12, 10))
+        plt.imshow(z_scores, aspect='auto', cmap='RdBu_r')
+        plt.colorbar(label='Z-score')
+        plt.title(f'Top {top_n} Gene Expression Heatmap')
+        plt.xlabel('Samples')
+        plt.ylabel('Genes')
+        plt.xticks(range(len(z_scores.columns)), z_scores.columns, rotation=45)
+        plt.yticks(range(len(z_scores.index)), z_scores.index)
+        plt.tight_layout()
+        plt.show()
+
+    @staticmethod
+    def plot_gc_content_distribution(genes_df, key_genes_df=None):
+        """Plot GC content distribution"""
+        plt.figure(figsize=(10, 6))
+
+        plt.hist(genes_df['gc_content'], bins=30, alpha=0.7,
+                 label=f'All Genes (n={len(genes_df)})', color='gray')
+
+        if key_genes_df is not None:
+            plt.hist(key_genes_df['gc_content'], bins=30, alpha=0.7,
+                     label=f'Key Genes (n={len(key_genes_df)})', color='red')
+
+        plt.xlabel('GC Content (%)')
+        plt.ylabel('Number of Genes')
+        plt.title('Gene GC Content Distribution')
+        plt.legend()
+        plt.grid(True, alpha=0.3)
+        plt.tight_layout()
+        plt.show()
+
+
+# Visualize results
+print("Generating visualizations...")
+
+# Check if differential_genes exists
+if 'differential_genes' in globals() and len(differential_genes) > 0:
+    # 1. Volcano plot
+    GeneVisualizer.plot_volcano(differential_genes)
+
+    # 2. Expression heatmap
+    GeneVisualizer.plot_gene_expression_heatmap(expression_df, top_n=20)
+
+    # 3. GC content distribution
+    if 'key_genes' in globals():
+        GeneVisualizer.plot_gc_content_distribution(genes_df, key_genes)
+    else:
+        GeneVisualizer.plot_gc_content_distribution(genes_df)
+
+    # 4. Differential gene statistics
+    plt.figure(figsize=(8, 6))
+    de_counts = differential_genes['de_type'].value_counts()
+    # Map Chinese categories to English
+    category_map = {'up': 'Up-regulated', 'down': 'Down-regulated', 'none': 'Non-DE'}
+    de_counts.index = [category_map.get(x, x) for x in de_counts.index]
+    colors = {'Up-regulated': 'red', 'Down-regulated': 'blue', 'Non-DE': 'gray'}
+    bar_colors = [colors.get(x, 'gray') for x in de_counts.index]
+
+    plt.bar(de_counts.index, de_counts.values, color=bar_colors)
+    plt.title('Differentially Expressed Genes')
+    plt.xlabel('Gene Type')
+    plt.ylabel('Count')
+    plt.tight_layout()
+    plt.show()
+else:
+    print("Warning: differential_genes not found. Skipping visualizations.")
