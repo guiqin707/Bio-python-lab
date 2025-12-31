@@ -1,0 +1,71 @@
+def export_results(genes_df, key_genes_df, expression_df, output_dir='./gene_analysis_results/'):
+    """导出分析结果"""
+    import os
+
+    #创建输出目录
+    os.makedirs(output_dir, exist_ok=True)
+
+    #保存CSV文件
+    genes_df.to_csv(f'{output_dir}all_genes.csv', index=False)
+    key_genes_df.to_csv(f'{output_dir}key_genes.csv', index=False)
+    expression_df.to_csv(f'{output_dir}all_expression_matrix.csv')
+
+    #保存关键基因序列为FASTA格式
+    fasta_records = []
+    for idx, row in key_genes_df.iterrows():
+        record = SeqRecord(
+            Seq(row['sequence']),
+            id=row['gene_id'],
+            description=f"length={row['length']} gc={row['gc_content']:.1f}%"
+            f"log2FC={row['log2_fold_change']:.2f} p={row['p_value']:.4e}"
+        )
+        fasta_records.append(record)
+
+    SeqIO.write(fasta_records, f'{output_dir}key_genes.fasta', 'fasta')
+
+    #生成分析报告
+    with open(f'{output_dir}key_genes.fasta', 'w') as f:
+        f.write("=== 基因组分析报告 ===\n\n")
+        f.write(f"分析时间： {pd.Timestamp.now()}\n")
+        f.write(f"总基因数：{len(genes_df)}\n")
+        f.write(f"关键基因数: {len(key_genes_df)}\n")
+        f.write(f"样本数: {len(expression_df.columns)}\n")
+        f.write(f"正常样本: {len([c for c in expression_df.columns if 'Normal' in c])}\n")
+        f.write(f"癌症样本: {len([c for c in expression_df.columns if 'Cancer' in c])}\n\n")
+
+        f.write("=== 关键基因统计 ===\n")
+        f.write(f"上调基因: {len(key_genes_df[key_genes_df['log2_fold_change'] > 0])}\n")
+        f.write(f"下调基因: {len(key_genes_df[key_genes_df['log2_fold_change'] < 0])}\n\n")
+
+        f.write("=== 表达变化Top 10基因 ===\n")
+        top_10 = key_genes_df.sort_values('log2_fold_change', key=abs, ascending=False).head(10)
+        for _, row in top_10.iterrows():
+            f.write(f"{row['gene_id']} log2FC={row['log2_fold_change']:.2f},"
+                    f"p={row['p_value']:.2e}, GC={row['gc_content']:.1f}%\n")
+    print(f"结果已保存到目录: {output_dir}")
+    print(f"1. 所有基因信息: {output_dir}all_genes.csv")
+    print(f"2. 关键基因列表: {output_dir}key_genes.csv")
+    print(f"3. 关键基因序列: {output_dir}key_genes.fasta")
+    print(f"4. 表达矩阵: {output_dir}expression_matrix.csv")
+    print(f"5. 分析报告: {output_dir}analysis_report.txt")
+
+
+#导出结果
+export_results(genes_df, key_genes, expression_df)
+
+#显示关键基因的详细信息
+print("\n=== 关键基因详细信息 ===")
+print(key_genes[['gene_id', 'log2_fold_change', 'p_value', 'length', 'gc_content']].describe())
+
+#显示最有潜力的候选基因
+print("\n=== 最优潜力的候选基因（表达变化最大）===")
+top_candidates = key_genes.sort_values('log2_fold_change', key=abs, ascending=False).head(5)
+for _, row in top_candidates.iterrows():
+    change_type = "上调" if row['log2_fold_change'] > 0 else "下调"
+    print(f"基因: {row['gene_id']}")
+    print(f"  变化: {change_type} {abs(row['log2_fold_change']):.2f}倍")
+    print(f"  显著性: p = {row['p_value']:.2e}")
+    print(f"  序列长度: {row['length']} bp")
+    print(f"  GC含量: {row['gc_content']:.1f}%")
+    print(f"  序列前50bp: {row['sequence'][:50]}...")
+    print()
