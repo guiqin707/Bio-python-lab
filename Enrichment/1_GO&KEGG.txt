@@ -1,0 +1,139 @@
+print("\n检查数据是否准备好 ...")
+print(f"genes_df 形状：{genes_df.shape if 'genes_df' in locals() else '未找到'}")
+print(f"key_genes 形状：{key_genes.shape if 'key_genes' in locals() else '未找到'}")
+print(f"expression_df 形状：{expression_df.shape if 'expression_df' in locals() else '未找到'}")
+
+import subprocess
+import sys
+
+def install_package(package):
+    """安装Python包"""
+    try:
+        __import__(package)
+        print(f"{package} 已安装")
+    except ImportError:
+        print(f"正在安装{package} ...")
+        subprocess.check_call([sys.executable, "-m", "pip", "install", package])
+
+#安装必要的包
+required_packages = [
+    'gseapy',  #功能富集分析
+    'mygene',  #基因ID查询
+    'networkx', #网络分析（可选）
+    'plotly',  #交互式可视化（可选）
+]
+
+for package in required_packages:
+    install_package(package.split('==')[0])  #去掉版本号
+
+#创建简化版的富集分析
+
+class SimpleEnrichmentAnalysis:
+    """简化版"""
+    def __init__(self):
+        self.go_results = None
+        self.kegg_results = None
+
+    def simulate_go_enrichment(self, key_genes_df, all_genes_df):
+        """模拟GO富集分析结果"""
+        print("模拟GO富集分析...")
+        #此只是模拟，实际分析应使用真实数据库
+        go_categories = {
+            'BP': [
+                'GO:0006955~immune response',
+                'GO:0007165~signal transduction',
+                'GO:0007049~cell cycle',
+                'GO:0006915~apoptotic process',
+                'GO:0006357~regulation of transcription',
+                'GO:0007155~cell adhesion',
+                'GO:0006508~proteolysis',
+                'GO:0006412~translation'
+            ],
+            'MF': [
+                'GO:0005515~protein binding',
+                'GO:0005524~ATP binding',
+                'GO:0003677~DNA binding',
+                'GO:0008270~zinc ion binding'
+            ],
+            'CC': [
+                'GO:0005737~cytoplasm',
+                'GO:0005634~nucleus',
+                'GO:0005886~plasma membrane',
+                'GO:0005829~cytosol'
+            ]
+        }
+        #模拟结果
+        results = []
+        for category, terms in go_categories.items():
+            for term in terms:
+                #随机生成统计值
+                p_value = np.random.uniform(0.001, 0.05)
+                gene_count = np.random.randint(2, 10)
+                enrichment = np.random.uniform(1.5, 8.0)
+
+                #随机选择几个基因
+                if len(key_genes_df) > 0:
+                    sample_genes = key_genes_df.sample(
+                        min(gene_count, len(key_genes_df))
+                    )['gene_id'].tolist()
+                else:
+                    sample_genes = []
+
+                results.append({
+                    'category': category,
+                    'term': term,
+                    'term_name': term.split('~')[1],
+                    'p_value': p_value,
+                    'gene_count': gene_count,
+                    'genes': ', '.join(sample_genes),
+                    'enrichment_ratio': enrichment,
+                    '-log10(pvalue)': -np.log10(p_value)
+                })
+        self.go_results = pd.DataFrame(results)
+        return self.go_results
+
+
+    def simulate_kegg_enrichment(self, key_genes_df):
+        """"模拟KEGG通路富集分析"""
+        print("模拟KEGG通路富集分析...")
+
+        #常见癌症相关通路
+        kegg_pathways = [
+            'hsa05200:Pathways in cancer',
+            'hsa04110:Cell cycle',
+            'hsa04151:PI3K-Akt signaling pathway',
+            'hsa04010:MAPK signaling pathway',
+            'hsa04630:Jak-STAT signaling pathway',
+            'hsa04310:Wnt signaling pathway',
+            'hsa04510:Focal adhesion',
+            'hsa04060:Cytokine-cytokine receptor interaction'
+        ]
+
+        results = []
+        for pathway in kegg_pathways:
+            p_value = np.random.uniform(0.001, 0.05)
+            gene_count = np.random.randint(3, 12)
+            enrichment = np.random.uniform(1.8, 6.0)
+
+            if len(key_genes_df) > 0:
+                sample_genes = key_genes_df.sample(
+                    min(gene_count, len(key_genes_df))
+                )['gene_id'].tolist()
+            else:
+                sample_genes = []
+
+            pathway_id = pathway.split(':')[0]
+            pathway_name = pahway.split(':')[1]
+
+            results.append({
+                'pathway_id': pathway_id,
+                'pathway_name': pathway_name,
+                'p_value': p_value,
+                'gene_count': gene_count,
+                'genes': ', '.join(sample_genes),
+                'enrichment_ratio': enrichment,
+                '-log10(pvalue)': -np.log10(p_value)
+            })
+        
+        self.kegg_results = pd.DataFrame(results)
+        return self.kegg_results
